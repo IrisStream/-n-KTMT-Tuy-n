@@ -4,8 +4,9 @@ using namespace std;
 
 int main()
 {
-	Qfloat x("1234.8125");
-	Qfloat::printBit(x.getBitSeq());
-	cout <<endl << x.getValue() << endl;
+	Qfloat * num1 = NULL;
+	decToBin(num1);
+	Qfloat* num2 = NULL;
+	binToDec(num2);
 	return 0;
 }

@@ -32,11 +32,17 @@ Qfloat::Qfloat(string num) : Qfloat()
 	for (; i < num.size(); i++)
 		intPart = intPart + num[i];
 	
-	//Chuyển phàn nguyên và phần thập phân sang nhị phân số chấm tĩnh
+	//Chuyển phần nguyên và phần thập phân sang nhị phân số chấm tĩnh
 	string staticPoint = decPartToBin(decPart);			
 	int pointPosition = staticPoint.size();				
 	staticPoint = staticPoint + intPartToBin(intPart);	
 
+	//Nếu chuỗi bit dạng dấu chấm tĩnh dài hơn kích thước của significand thì xóa bớt
+	while (staticPoint.size() > significandSize + 1)
+	{
+		staticPoint.erase(staticPoint.begin());
+		pointPosition--;
+	}
 	//Tính significand
 	int e = staticPoint.size() - 1;
 	while (staticPoint[e] == '0')
@@ -154,6 +160,9 @@ string Qfloat::decPartToBin(string num)
 	{
 		num = mult2onDec(num, rest);
 		ans = char(rest + '0') + ans;
+		//Nếu kích thước phần cần lưu mà lớn hơn kích thước của significand thì dừng
+		if (ans.size() == significandSize)
+			break;
 	}
 	return ans;
 }
@@ -298,5 +307,40 @@ string Qfloat::standardize(string num)
 	if (num == "0.0-")
 		num = "0.0";
 	return num;
+}
+
+void decToBin(Qfloat* num)
+{
+	std::cout << "Nhap so: ";
+	string str;
+	std::cin >> str;
+	num = new Qfloat(str);
+	std::cout << "Chuoi bit la: ";
+	Qfloat::printBit(num->getBitSeq());
+	std::cout << std::endl;
+}
+
+
+/*
+	Bạn bị đứng máy??!!
+	Rất tiếc vì hiện tại tôi chưa tối ưu hóa code của mình 
+để tính toán các dãy bit có giá trị quá to hoặc quá nhỏ.
+	Bạn có thể tham khảo phần cuối của file qfloat.h ở đó 
+tôi có để cho bạn 1 vài gợi ý mà tôi nghĩ nó sẽ làm chương 
+trình này chạy nhanh hơn (>.o)
+	Cố lên!!!
+*/
+void binToDec(Qfloat* num)
+{
+	std::cout << "Nhap vao 1 chuoi bit: ";
+	string bitSeq;
+	std::cin >> bitSeq;
+	bool* bits = new bool[Qfloat::numSize];
+	for (int i = 0; i < Qfloat::numSize; i++)
+		bits[i] = false;
+	for (int i = 0; i < bitSeq.size(); i++)
+		bits[i] = (bitSeq[i] == '1');
+	num = new Qfloat(bits);
+	std::cout << "Gia tri cua so la: " << num->getValue() << std::endl;
 }
 

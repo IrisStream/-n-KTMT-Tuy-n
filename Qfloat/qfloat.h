@@ -36,6 +36,7 @@ private:
 	bool exponent[15];
 	bool significand[112];
 public:
+	static const int numSize = 128;
 	//CONSTRUCTOR
 	/*
 	Hàm khởi tạo mặc định:
@@ -131,4 +132,38 @@ public:
 	static string standardize(string);	
 };
 
+//USER DISPLAY FUNCTION
+/*
+Giao diện chuyển từ thập phân sang nhị phân
+TODO:
+	+Nhập 1 số thập phân 
+	+Chuyển sang chuỗi nhị phân 
+	+Xuất chuỗi nhị phân ra màn hình
+*/
+void decToBin(Qfloat* num);
+
+/*
+Giao diện chuyển từ nhị phân sang thập phân
+TODO:
+	+Nhập 1 chuỗi bit
+	+Chuyển chuỗi bit thành mảng boot có Qfloat::numSize phần tử
+	+Lưu vào biến kiểu Qfloat
+	+Xuất giá trị thập phân của số ra màn hình
+*/
+void binToDec(Qfloat* num);
 #endif // !__QFLOAT__
+
+/*
+CÁC HẠN CHẾ CHƯA GIẢI QUYẾT ĐƯỢC
+	-Thời gian tính toán quá lâu nếu nhập 1 dãy bit của số quá lớn hoặc quá nhỏ
+	-Chưa có hàm làm tròn và quy định về việc làm tròn mặc định bao nhiêu chữ số ở phần thập phân
+	-Chưa có các đối tượng đặc biệt như số vô cùng (Inf), số báo lỗi(NaN), Denomalize number
+	-Chưa có các hàm giao diện thân thiện với người dùng
+	-Chưa có các toán tử số học, gán, so sánh cho đối tượng
+*/
+
+/*
+CÁC GỢI Ý HƯỚNG GIẢI QUYẾT
+	-Dùng hàm nhân nhanh 2 số lớn (FFT, katastuba)
+	-Đặt số lượng chữ số tối đa của phần thập phân và phần nguyên <= 10000	
+*/
