@@ -83,7 +83,7 @@ public:
 	Chuyển phần thực của số thực sang dãy nhị phân
 	TODO:
 		+Xử lý phần thực là số 0
-		-Xử lý các số vượt quá số bit để lưu
+		+Xử lý các số vượt quá số bit để lưu
 	*/
 	static string decPartToBin(string); 
 	
