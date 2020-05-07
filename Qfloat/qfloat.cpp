@@ -125,6 +125,9 @@ string Qfloat::getValue()
 	for (int i = e; i < lastOne; i++)
 	{
 		Pow = div2onDec(Pow);
+		//Trường hợp e âm sẽ có 1 số 1 của phần thập phân nằm bên trái dấu chấm.
+		if (i == -1)
+			decPart = addDec(decPart, Pow);
 		if (i >= 0 && this->significand[i] == true)
 			decPart = addDec(decPart, Pow);
 	}
@@ -140,6 +143,8 @@ string Qfloat::getValue()
 string Qfloat::intPartToBin(string num)
 {
 	string ans;
+	if (num == "0")
+		return string("0");
 	int rest = 0;
 	while (num != "0")
 	{
@@ -156,12 +161,21 @@ string Qfloat::decPartToBin(string num)
 		return string("0");
 	string ans;
 	int rest = 0;
+	//Bắt đầu đếm khi gặp bit 1 đầu tiên
+	bool isCounting = false;
+	//Biến đếm bit
+	int counter = 0;
 	while (num != "0")
 	{
 		num = mult2onDec(num, rest);
 		ans = char(rest + '0') + ans;
+		//Gặp bit 1 đầu tiên --> bật chế độ đếm bit
+		if (ans[0] == '1')
+			isCounting = true;
+		if (isCounting)
+			counter++;
 		//Nếu kích thước phần cần lưu mà lớn hơn kích thước của significand thì dừng
-		if (ans.size() == significandSize)
+		if (counter == significandSize)
 			break;
 	}
 	return ans;
@@ -205,9 +219,9 @@ void Qfloat::printBit(bool* bitSeq)
 {
 	int counter = 0;
 	if (bitSeq[counter++] == false)
-		std::cout << 0 << " ";
+		std::cout << 0;// << " ";
 	else
-		std::cout << 1 << " ";
+		std::cout << 1;// << " ";
 	for (int i = 0; i < exponentSize; i++)
 	{
 		if (bitSeq[counter++] == false)
@@ -215,7 +229,7 @@ void Qfloat::printBit(bool* bitSeq)
 		else
 			std::cout << 1;
 	}
-	std::cout << " ";
+	//std::cout << " ";
 	for (int i = 0; i < significandSize; i++)
 	{
 		if (bitSeq[counter++] == false)
