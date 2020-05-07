@@ -48,6 +48,7 @@ public:
 	Hàm khởi tạo đưa vào 1 số thập phân dạng chuỗi.
 	TODO:
 		+Chuẩn hóa 1 số để tránh người dùng nhập không chuẩn và đảo chuỗi để tiện xử lý
+		+Kiểm tra số vừa nhập bằng 0
 		+Kiểm tra số âm
 		+Tách phần nguyên(integer part) và phần thập phân(decimal part)
 		+Chuyển phân nguyên và phần thập phân thành dãy bit dạng số dấu chấm tĩnh.
@@ -66,6 +67,7 @@ public:
 	/*
 	Hàm chuyển đổi dãy bit thành số thập phân
 	TODO:
+		+Kiểm tra số 0
 		+Xác định dấu của số
 		+Lấy giá trị ở hệ thập phân của exponent
 		+Xác định bit 1 phải nhất của significand

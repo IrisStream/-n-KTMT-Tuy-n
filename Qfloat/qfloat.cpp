@@ -15,6 +15,9 @@ Qfloat::Qfloat(string num) : Qfloat()
 	//Chuẩn hóa 1 số để tránh người dùng nhập không chuẩn
 	num = standardize(num);
 
+	//Kiểm tra số vừa nhập bằng 0
+	if (num == "0.0")
+		return;
 	//Kiểm tra số âm
 	if (num[num.size() - 1] == '-')
 	{
@@ -86,11 +89,19 @@ bool* Qfloat::getBitSeq()
 
 string Qfloat::getValue()
 {
+	//Kiểm tra số 0 
+	int check = sign;
+	for (int i = 0; i < exponentSize; i++)
+		check = check + exponent[i];
+	for (int i = 0; i < significandSize; i++)
+		check = check + significand[i];
+	if (check == 0)
+		return string("0");
 	//Xác định dấu của số
 	string ans;
 	if (sign == true)
 		ans = ans + '-';
-
+	
 	//Lấy giá trị ở hệ thập phân của exponent
 	int e = 0;
 	for (int i = 0; i < exponentSize; i++)
