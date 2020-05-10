@@ -3,13 +3,20 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <fstream>
 using std::string;
 
+/*
+Các tham nhận diện lỗi nhập dữ liệu của người dùng
+	+NOT_A_NUMBER: chuỗi số vừa nhập không phải là 1 số 
+	+WRONG_BASE: Hệ số chuyển đổi chưa được hỗ trợ
+*/
 enum INPUT_ERROR
 {
 	NOT_A_NUMBER,
-	WRONG_BASE
+	WRONG_BASE,
 };
+
 /*
 lỚP MÔ TẢ CÁC ĐÔI TƯỢNG SỐ THỰC LƯU DƯỚI DẠNG SỐ CHẤM ĐỘNG KÍCH THƯỚC 128BIT
 	+Sign: 1 bit
@@ -89,7 +96,7 @@ public:
 	/*
 	Hàm chuyển đổi dãy bit thành số thập phân
 	TODO:
-		+Kiểm tra số 0
+		+Kiểm tra số đặc biệt
 		+Xác định dấu của số
 		+Lấy giá trị ở hệ thập phân của exponent
 		+Xác định bit 1 phải nhất của significand
@@ -151,6 +158,69 @@ public:
 		+Nếu số được nhập là -0.0 thì chuyển thành 0.0
 	*/
 	static string standardize(string);	
+
+	//Các hàm kiểm tra các số đặc biệt:
+	//Số 0: exponent == 0 && significand == 0
+	bool isZero()
+	{
+		for (int i = 1; i < 4; i++)
+			if (data[i] != 0)
+				return false;
+		//Vì bit dấu có thể là 1 nên cần kiểm tra data[0] riêng
+		if (data[0] > 1)
+			return false;
+		return true;
+	}
+	
+	//Số không thể chuẩn hóa(Denormalized Number): exponent == 0 && significand != 0
+	bool isDenormalized()
+	{
+		//Kiểm tra phần exponent
+		for (int i = 0; i < exponentSize; i++)
+		{
+			if (getExponent(i))
+				return false;
+		}
+		//Nếu không phải số 0 => significand != 0 => Denormalized Number
+		if (!isZero())
+			return true;
+		return false;
+	}
+	
+	//Sô vô cùng(Inf): exponent == 111..1 && significand == 0
+	bool isInf()
+	{
+		//Kiểm tra phần exponent
+		for (int i = 0; i < exponentSize; i++)
+		{
+			if (getExponent(i) == false)
+				return false;
+		}
+
+		//Kiểm tra phần significand
+		for (int i = 0; i < significandSize; i++)
+		{
+			if (getSignificand(i))
+				return false;
+		}
+		return true;
+	}
+	
+	//Số báo lỗi(NaN): exponent == 111..1 && significand != 0
+	bool isNaN()
+	{
+		//Kiểm tra phần exponent
+		for (int i = 0; i < exponentSize; i++)
+		{
+			if (getExponent(i) == false)
+				return false;
+		}
+
+		//Nếu số vừa nhập không phải Inf => significand != 0
+		if (!isInf())
+			return true;
+		return false;
+	}
 };
 
 //USER DISPLAY FUNCTION
@@ -170,10 +240,10 @@ TODO:
 	+Chuyển chuỗi số vừa nhập được thành 1 đối tượng Qfloat
 	+Trả về giá trị của p2
 */
-int ScanQfloat(Qfloat *&);
+int ScanQfloat(Qfloat *&,std::istream&,std::ostream&);
 
 //Xuất num ra màn hình ở hệ base
-void PrintQfloat(Qfloat* num, int base);
+void PrintQfloat(Qfloat* num, int base, std::ostream&);
 
 /*
 Kiểm tra chuỗi num có phải là 1 số hay không?
@@ -192,7 +262,10 @@ TODO:
 bool isNum(string& num);
 
 //In ra lỗi nhập liệu
-void printInputError(INPUT_ERROR);
+void printInputError(INPUT_ERROR,std::ostream &);
+
+//Flow chính của cả chương trình: Được mô tả theo đề bài yêu cầu
+void process(std::istream&, std::ostream&);
 #endif // !__QFLOAT__
 
 /*

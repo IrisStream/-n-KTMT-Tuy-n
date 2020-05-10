@@ -139,14 +139,16 @@ string Qfloat::getBits()
 
 string Qfloat::getValue()
 {
-	//Kiểm tra số 0 
-	int check = getSign();
-	for (int i = 0; i < exponentSize; i++)
-		check = check + getExponent(i);
-	for (int i = 0; i < significandSize; i++)
-		check = check + getSignificand(i);
-	if (check == 0)
+	//Kiểm tra số đặc biệt
+	if (this->isZero())
 		return string("0");
+	if (this->isDenormalized())
+		return string("Denormalized Number");
+	if (this->isInf())
+		return string("Inf");
+	if (this->isNaN())
+		return string("NaN");
+
 	//Xác định dấu của số
 	string ans;
 	if (getSign() == true)
@@ -385,25 +387,25 @@ Qfloat* binToDec(string num)
 	return newQfloat;
 }
 
-int ScanQfloat(Qfloat* &num)
+int ScanQfloat(Qfloat* &num, std::istream& inp, std::ostream& outp)
 {
 	//Nhập 2 chỉ thị p1, p2 và chuỗi số
 	int p1, p2;
 	string str;
-	std::cin >> p1 >> p2;
-	std::getline(std::cin,str);
+	inp >> p1 >> p2;
+	std::getline(inp,str);
 
 	//Kiểm tra chuỗi số vừa nhập có phải là con số hay không?
 	if (isNum(str) == false)
 	{
-		printInputError(NOT_A_NUMBER);
+		printInputError(NOT_A_NUMBER, outp);
 		return 0;
 	}
 
 	//Kiểm tra 2 chỉ thị có hợp lệ không
 	if (!((p1 == 10 && p2 == 2) || (p1 == 2 && p2 == 10)))
 	{
-		printInputError(WRONG_BASE);
+		printInputError(WRONG_BASE, outp);
 	}
 	
 	//Chuyển chuỗi số vừa nhập được thành 1 đối tượng Qfloat
@@ -416,14 +418,14 @@ int ScanQfloat(Qfloat* &num)
 	return p2;
 }
 
-void PrintQfloat(Qfloat* num, int base)
+void PrintQfloat(Qfloat* num, int base, std::ostream& outp)
 {
 	if (base == 0)
 		return;
 	else if (base == 2)
-		std::cout << num->getBits() << std::endl;
+		outp << num->getBits() << std::endl;
 	else
-		std::cout << num->getValue() << std::endl;
+		outp << num->getValue() << std::endl;
 }
 
 bool isNum(string& num)
@@ -472,18 +474,27 @@ bool isNum(string& num)
 	return true;
 }
 
-void printInputError(INPUT_ERROR e)
+void printInputError(INPUT_ERROR e, std::ostream& outp)
 {
 	switch (e)
 	{
 	case NOT_A_NUMBER:
-		std::cout << "Sorry! The thing you'd just entered was not a number" << std::endl;
+		outp << "Sorry! The thing you'd just entered was not a number" << std::endl;
 		break;
 	case WRONG_BASE:
-		std::cout << "This program doesn't work on those base" << std::endl;
+		outp << "This program doesn't work on those base" << std::endl;
 		break;
-	default:
-		break;
+	}
+}
+
+void process(std::istream& inp, std::ostream& outp)
+{
+	while (!inp.eof())
+	{
+		Qfloat* num = NULL;
+		int base = ScanQfloat(num, inp, outp);
+		PrintQfloat(num, base, outp);
+		delete num;
 	}
 }
 

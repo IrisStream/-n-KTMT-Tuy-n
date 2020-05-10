@@ -1,12 +1,18 @@
 #include "qfloat.h"
-#include <conio.h>
-#include <fstream>
-using namespace std;
 
 int main(int argc, char* argv[])
 {
-	Qfloat* num = NULL;
-	int base = ScanQfloat(num);
-	PrintQfloat(num, base);
+	if (argc == 1)
+	{
+		process(std::cin, std::cout);
+	}
+	else
+	{
+		std::ifstream inp(argv[1]);
+		std::ofstream outp(argv[2]);
+		process(inp, outp);
+		inp.close();
+		outp.close();
+	}
 	return 0;
 }
