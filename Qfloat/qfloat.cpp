@@ -1,12 +1,63 @@
 ﻿#include "qfloat.h"
 
+bool Qfloat::getSign()
+{
+	return (data[0] & 1);
+}
+
+bool Qfloat::getExponent(int i)
+{
+	return((data[0] >> (i + 1)) & 1);
+}
+
+bool Qfloat::getSignificand(int i)
+{
+	if (i < 16)
+		return ((data[0] >> (i + 16)) & 1);
+	else
+	{
+		i += 16;
+		int interval = i / 32;
+		i = i % 32;
+		return ((data[interval] >> i) & 1);
+	}
+}
+
+void Qfloat::setSign(bool value)
+{
+	if (getSign() == value)
+		return;
+	data[0] ^= 1;
+}
+
+void Qfloat::setExponent(int i, bool value)
+{
+	if (getExponent(i) == value)
+		return;
+	data[0] = data[0] ^ (1 << (i + 1));
+}
+
+void Qfloat::setSignificand(int i, bool value)
+{
+	if (getSignificand(i) == value)
+		return;
+	if (i < 16)
+	{
+		data[0] = data[0] ^ (1 << (i + 16));
+	}
+	else
+	{
+		i += 16;
+		int interval = i / 32;
+		i = i % 32;
+		data[interval] = data[interval] ^ (1 << i);
+	}
+}
+
 Qfloat::Qfloat()
 {
-	sign = false;
-	for (int i = 0; i < exponentSize; i++)
-		this->exponent[i] = false;
-	for (int i = 0; i < significandSize; i++)
-		this->significand[i] = false;
+	//Khởi tạo tất cả các bit về 0
+	memset(data, 0, sizeof(data));
 }
 
 
@@ -22,7 +73,7 @@ Qfloat::Qfloat(string num) : Qfloat()
 	if (num[num.size() - 1] == '-')
 	{
 		num.resize(num.size() - 1);
-		this->sign = true;
+		
 	}
 	
 	//Tách phần nguyên và phần thập phân
@@ -51,26 +102,26 @@ Qfloat::Qfloat(string num) : Qfloat()
 	while (staticPoint[e] == '0')
 		e--;
 	for (int i = e - 1; i >= 0; i--)
-		this->significand[e - i - 1] = (staticPoint[i] == '1');
+		this->setSignificand(e - i - 1, staticPoint[i] == '1');
 
 	//Tính exponent
 	e = biasingValue + (e - pointPosition);
 	for (int i = 0; i < exponentSize; i++)
-		this->exponent[14-i] = (e >> i) & 1;
+		this->setExponent(14-i, (e >> i) & 1);
 }
 
 
 Qfloat::Qfloat(bool* bitSeq) : Qfloat()
 {
 	int counter = 0;
-	sign = bitSeq[counter++];
+	setSign(bitSeq[counter++]);
 	for (int i = 0; i < exponentSize; i++)
 	{
-		this->exponent[i] = bitSeq[counter++];
+		setExponent(i, bitSeq[counter++]);
 	}
 	for (int i = 0; i < significandSize; i++)
 	{
-		this->significand[i] = bitSeq[counter++];
+		this->setSignificand(i, bitSeq[counter++]);
 	}
 }
 
@@ -78,11 +129,11 @@ bool* Qfloat::getBitSeq()
 {
 	bool* bitSeq = new bool[128];
 	int counter = 0;
-	bitSeq[counter++] = this->sign;
+	bitSeq[counter++] = this->getSign();
 	for (int i = 0; i < exponentSize; i++)
-		bitSeq[counter++] = this->exponent[i];
+		bitSeq[counter++] = this->getExponent(i);
 	for (int i = 0; i < significandSize; i++)
-		bitSeq[counter++] = this->significand[i];
+		bitSeq[counter++] = this->getSignificand(i);
 	return bitSeq;
 }
 
@@ -90,29 +141,29 @@ bool* Qfloat::getBitSeq()
 string Qfloat::getValue()
 {
 	//Kiểm tra số 0 
-	int check = sign;
+	int check = getSign();
 	for (int i = 0; i < exponentSize; i++)
-		check = check + exponent[i];
+		check = check + getExponent(i);
 	for (int i = 0; i < significandSize; i++)
-		check = check + significand[i];
+		check = check + getSignificand(i);
 	if (check == 0)
 		return string("0");
 	//Xác định dấu của số
 	string ans;
-	if (sign == true)
+	if (getSign() == true)
 		ans = ans + '-';
 	
 	//Lấy giá trị ở hệ thập phân của exponent
 	int e = 0;
 	for (int i = 0; i < exponentSize; i++)
 	{
-		e = e | (this->exponent[i] << (14 - i));
+		e = e | (this->getExponent(i) << (14 - i));
 	}
 	e = e - biasingValue;
 	
 	//Xác định bit 1 phải nhất của significand
 	int lastOne = significandSize;
-	while (this->significand[lastOne - 1] == false)
+	while (this->getSignificand(lastOne - 1) == false)
 		lastOne--;
 
 	//Tính phần nguyên
@@ -123,7 +174,7 @@ string Qfloat::getValue()
 		string Pow = "1";
 		for (int i = pointPos-1; i >= 0; i--)
 		{
-			if (this->significand[i] == true)
+			if (this->getSignificand(i) == true)
 				intPart = addInt(intPart, Pow);
 			Pow = addInt(Pow,Pow);
 		}
@@ -139,7 +190,7 @@ string Qfloat::getValue()
 		//Trường hợp e âm sẽ có 1 số 1 của phần thập phân nằm bên trái dấu chấm.
 		if (i == -1)
 			decPart = addDec(decPart, Pow);
-		if (i >= 0 && this->significand[i] == true)
+		if (i >= 0 && this->getSignificand(i) == true)
 			decPart = addDec(decPart, Pow);
 	}
 

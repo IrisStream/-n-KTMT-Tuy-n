@@ -25,16 +25,33 @@ TODO:
 	+Hàm xuất giá trị thập phân: Trả về 1 chuỗi mang giá trị thập phân của số
 	+Hàm xuất giá trị nhị phân: Trả về 1 mảng bool thể hiện giá trị của số ở hệ nhị phân
 */
-
 class Qfloat
 {
 private:
 	static const int exponentSize = 15;
 	static const int significandSize = 112;
 	static const int biasingValue = 16383;
-	bool sign;
-	bool exponent[15];
-	bool significand[112];
+	
+	//		[0..31]    [32..63]    [64..95]    [96..128]	
+	int data[4];
+
+	//Hàm lấy bit dấu
+	bool getSign();
+
+	//Hàm lấy bit thứ i của exponent
+	bool getExponent(int i);
+	
+	//Hàm lấy bit thứ i của significand
+	bool getSignificand(int i);
+
+	//Hàm gán bit dấu
+	void setSign(bool value);
+
+	//Hàm gán bit thứ i của exponent
+	void setExponent(int i, bool value);
+
+	//Hàm gán bit thứu i của signficand
+	void setSignificand(int i, bool value);
 public:
 	static const int numSize = 128;
 	//CONSTRUCTOR
