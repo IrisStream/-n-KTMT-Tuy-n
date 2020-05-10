@@ -5,6 +5,11 @@
 #include <string>
 using std::string;
 
+enum INPUT_ERROR
+{
+	NOT_A_NUMBER,
+	WRONG_BASE
+};
 /*
 lỚP MÔ TẢ CÁC ĐÔI TƯỢNG SỐ THỰC LƯU DƯỚI DẠNG SỐ CHẤM ĐỘNG KÍCH THƯỚC 128BIT
 	+Sign: 1 bit
@@ -78,8 +83,8 @@ public:
 	Qfloat(bool* bitSeq);	//DONE
 
 	//getter
-	//Hàm xuất ra mảng bool là chuỗi bit thể hiện dạng số chấm động của đối tượng
-	bool* getBitSeq();	//DONE
+	//Hàm xuất ra chuỗi bit của đối tượng
+	string getBits();	//DONE
 	
 	/*
 	Hàm chuyển đổi dãy bit thành số thập phân
@@ -118,9 +123,6 @@ public:
 	rest = 1 nếu num*2 > 1 và ngược lại
 	*/
 	static string mult2onDec(string, int&); //DONE
-	
-	//Xuất chuỗi bit ra màn hình từ 1 mảng bool theo định dạng dấu chấm động
-	static void printBit(bool*); //DONE
 
 	//Hàm cộng phần nguyên của 2 số
 	static string addInt(string, string); //DONE
@@ -152,24 +154,45 @@ public:
 };
 
 //USER DISPLAY FUNCTION
-/*
-Giao diện chuyển từ thập phân sang nhị phân
-TODO:
-	+Nhập 1 số thập phân 
-	+Chuyển sang chuỗi nhị phân 
-	+Xuất chuỗi nhị phân ra màn hình
-*/
-void decToBin(Qfloat* num);
+
+//Chuyển chuỗi num ở hệ thập phân thành 1 đối tượng Qfloat
+Qfloat* decToBin(string num);
+
+//Chuyển chuỗi num ở hệ nhị phân thành 1 đối tượng Qfloat
+Qfloat* binToDec(string num);
 
 /*
-Giao diện chuyển từ nhị phân sang thập phân
+Nhập dữ liệu
 TODO:
-	+Nhập 1 chuỗi bit
-	+Chuyển chuỗi bit thành mảng boot có Qfloat::numSize phần tử
-	+Lưu vào biến kiểu Qfloat
-	+Xuất giá trị thập phân của số ra màn hình
+	+Nhập 2 chỉ thị p1, p2 và chuỗi số
+	+Kiểm tra chuỗi số vừa nhập có phải là 1 con số hay không?
+	+Kiểm tra 2 chỉ thị có ở ngoài 2 hệ 10 và 2 không
+	+Chuyển chuỗi số vừa nhập được thành 1 đối tượng Qfloat
+	+Trả về giá trị của p2
 */
-void binToDec(Qfloat* num);
+int ScanQfloat(Qfloat *&);
+
+//Xuất num ra màn hình ở hệ base
+void PrintQfloat(Qfloat* num, int base);
+
+/*
+Kiểm tra chuỗi num có phải là 1 số hay không?
+TODO:
+	+Kiểm tra chuỗi có các kí tự nào khác ngoài:
+		*Kí tự ' '
+		*Các kí tự từ '0' đến 9'
+		*kí tự '.'
+	+Xóa các khoảng trắng ở đầu và cuối chuỗi để tiện kiểm tra
+		+Đảo ngược chuỗi và xóa các khoảng trống đầu chuỗi
+		+Đảo ngược chuỗi lần nữa và các các khoảng trống cuối chuỗi
+	+Kiểm tra có kí tự ' ' nào ở giữa chuỗi không
+	+Kiểm tra số lượng kí tự '.' trong chuỗi
+	+Kiểm tra chuỗi có phải là chuỗi rỗng không(Do người dùng nhập toàn khoảng trống)
+*/
+bool isNum(string& num);
+
+//In ra lỗi nhập liệu
+void printInputError(INPUT_ERROR);
 #endif // !__QFLOAT__
 
 /*

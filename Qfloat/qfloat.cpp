@@ -125,16 +125,15 @@ Qfloat::Qfloat(bool* bitSeq) : Qfloat()
 	}
 }
 
-bool* Qfloat::getBitSeq()
+string Qfloat::getBits()
 {
-	bool* bitSeq = new bool[128];
-	int counter = 0;
-	bitSeq[counter++] = this->getSign();
+	string num;
+	num = num + char('0' + this->getSign());
 	for (int i = 0; i < exponentSize; i++)
-		bitSeq[counter++] = this->getExponent(i);
+		num = num + char('0' + this->getExponent(i));
 	for (int i = 0; i < significandSize; i++)
-		bitSeq[counter++] = this->getSignificand(i);
-	return bitSeq;
+		num = num + char('0' + this->getSignificand(i));
+	return num;
 }
 
 
@@ -277,30 +276,6 @@ string Qfloat::mult2onDec(string num, int& rest)
 	return ans;
 }
 
-void Qfloat::printBit(bool* bitSeq)
-{
-	int counter = 0;
-	if (bitSeq[counter++] == false)
-		std::cout << 0;// << " ";
-	else
-		std::cout << 1;// << " ";
-	for (int i = 0; i < exponentSize; i++)
-	{
-		if (bitSeq[counter++] == false)
-			std::cout << 0;
-		else
-			std::cout << 1;
-	}
-	//std::cout << " ";
-	for (int i = 0; i < significandSize; i++)
-	{
-		if (bitSeq[counter++] == false)
-			std::cout << 0;
-		else
-			std::cout << 1;
-	}
-}
-
 //Hàm cộng phần nguyên của 2 số
 string Qfloat::addInt(string a, string b)
 {
@@ -385,15 +360,10 @@ string Qfloat::standardize(string num)
 	return num;
 }
 
-void decToBin(Qfloat* num)
+Qfloat* decToBin(string num)
 {
-	std::cout << "Nhap so: ";
-	string str;
-	std::cin >> str;
-	num = new Qfloat(str);
-	std::cout << "Chuoi bit la: ";
-	Qfloat::printBit(num->getBitSeq());
-	std::cout << std::endl;
+	Qfloat* newQfloat = new Qfloat(num);
+	return newQfloat;
 }
 
 
@@ -406,17 +376,114 @@ tôi có để cho bạn 1 vài gợi ý mà tôi nghĩ nó sẽ làm chương
 trình này chạy nhanh hơn (>.o)
 	Cố lên!!!
 */
-void binToDec(Qfloat* num)
+Qfloat* binToDec(string num)
 {
-	std::cout << "Nhap vao 1 chuoi bit: ";
-	string bitSeq;
-	std::cin >> bitSeq;
-	bool* bits = new bool[Qfloat::numSize];
-	for (int i = 0; i < Qfloat::numSize; i++)
-		bits[i] = false;
-	for (int i = 0; i < bitSeq.size(); i++)
-		bits[i] = (bitSeq[i] == '1');
-	num = new Qfloat(bits);
-	std::cout << "Gia tri cua so la: " << num->getValue() << std::endl;
+	bool* bits = new bool[128];
+	for (int i = 0; i < num.size(); i++)
+		bits[i] = (num[i] == '1');
+	Qfloat* newQfloat = new Qfloat(bits);
+	return newQfloat;
+}
+
+int ScanQfloat(Qfloat* &num)
+{
+	//Nhập 2 chỉ thị p1, p2 và chuỗi số
+	int p1, p2;
+	string str;
+	std::cin >> p1 >> p2;
+	std::getline(std::cin,str);
+
+	//Kiểm tra chuỗi số vừa nhập có phải là con số hay không?
+	if (isNum(str) == false)
+	{
+		printInputError(NOT_A_NUMBER);
+		return 0;
+	}
+
+	//Kiểm tra 2 chỉ thị có hợp lệ không
+	if (!((p1 == 10 && p2 == 2) || (p1 == 2 && p2 == 10)))
+	{
+		printInputError(WRONG_BASE);
+	}
+	
+	//Chuyển chuỗi số vừa nhập được thành 1 đối tượng Qfloat
+	if (p1 == 2)
+		num = binToDec(str);
+	else
+		num = decToBin(str);
+	
+	//Trả về giá trị của p2
+	return p2;
+}
+
+void PrintQfloat(Qfloat* num, int base)
+{
+	if (base == 0)
+		return;
+	else if (base == 2)
+		std::cout << num->getBits() << std::endl;
+	else
+		std::cout << num->getValue() << std::endl;
+}
+
+bool isNum(string& num)
+{
+	//Kiểm tra các kí tự có hợp lệ không:
+	for (int i = 0; i < num.size(); i++)
+		if (!(num[i] == ' ' ||
+			(num[i] >= '0' && num[i] <= '9') ||
+			num[i] == '.'))
+		{
+			return false;
+		}
+
+	//Xóa các khoảng trắng ở đầu và cuối chuỗi để tiện kiểm tra
+	std::reverse(num.begin(), num.end());
+	int size = num.size();
+	while (num.size() > 0 && num[size - 1] == ' ')
+		size--;
+	num.resize(size);
+	std::reverse(num.begin(), num.end());
+	size = num.size();
+	while (num.size() > 0 && num[size - 1] == ' ')
+		size--;
+	num.resize(size);
+
+	//Kiểm tra có kí tự ' ' nào ở giữa chuỗi không
+	for (int i = 0; i < num.size(); i++)
+	{
+		if (num[i] == ' ')
+			return false;
+	}
+	
+	//Kiểm tra số lượng kí tự '.' trong chuỗi
+	int numPoint = 0;
+	for (int i = 0; i < num.size(); i++)
+	{
+		if (num[i] == '.')
+			numPoint++;
+		if (numPoint > 1)
+			return false;
+	}
+	
+	//Kiểm tra chuỗi rỗng
+	if (num.size() == 0)
+		return false;
+	return true;
+}
+
+void printInputError(INPUT_ERROR e)
+{
+	switch (e)
+	{
+	case NOT_A_NUMBER:
+		std::cout << "Sorry! The thing you'd just entered was not a number" << std::endl;
+		break;
+	case WRONG_BASE:
+		std::cout << "This program doesn't work on those base" << std::endl;
+		break;
+	default:
+		break;
+	}
 }
 
