@@ -147,9 +147,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bigint.h" />
     <ClInclude Include="qfloat.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BigInt.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="qfloat.cpp" />
   </ItemGroup>
